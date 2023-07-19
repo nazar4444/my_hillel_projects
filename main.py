@@ -60,3 +60,6 @@ print(reason)
 def random_numbers() -> int:
     return random.randint(0, 1000)
 
+
+def func(*args):
+    pass
