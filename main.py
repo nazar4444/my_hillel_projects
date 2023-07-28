@@ -1,65 +1,26 @@
-import random
+import requests
+import csv
+import time
 
-DIGITS = "1234567890"
-SMALL_LETTERS = "abcdefghijklmnopqrstuvwxyz"
-BIG_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-EXTRA_CHARS = "+-/*!№;%:?*()="
+url = "http://api.open-notify.org/iss-now.json"
 
-ALL_CHARS = DIGITS + SMALL_LETTERS + BIG_LETTERS + EXTRA_CHARS
-
-
-def check_password(user_password):
-    has_digit = False
-    has_small_letter = False
-    has_big_letters = False
-    has_extra_chars = False
-
-    if len(user_password) < 8:
-        return "Длинна пароля должна быть не меньше"
-
-    for symbol in user_password:
-        if symbol not in ALL_CHARS:
-            return "Пароль не соответствует требованиям"
-
-        if symbol in DIGITS:
-            has_digit = True
-
-        elif symbol in SMALL_LETTERS:
-            has_small_letter = True
-
-        elif symbol in BIG_LETTERS:
-            has_big_letters = True
-
-        else:
-            has_extra_chars = True
-
-    errors = []
-    if has_digit == False:
-        errors.append("Добавь в свой пароль цифры")
-
-    if has_big_letters == False:
-        errors.append("Добавь в свой пароль большие буквы")
-
-    if has_small_letter == False:
-        errors.append("Добавь в свой пароль маленькие буквы")
-
-    if has_extra_chars == False:
-        errors.append("Добавь в свой пароль специальные символы")
-
-    if len(errors) > 0:
-        return errors
-    else:
-        return "Пароль идеален"
+csv_filename = "mks_positions.csv"
 
 
-password = input("Введите пароль: ")
-reason = check_password(password)
-print(reason)
+def get_mks_position():
+    response = requests.get(url)
+    data = response.json()
+    return data["mks_position"]["latitude"], data["mks_position"]["longitude"]
 
 
-def random_numbers() -> int:
-    return random.randint(0, 1000)
+def write_csv(lat, lon):
+    with open(csv_filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([lat, lon])
 
 
-def func(*args):
-    pass
+while True:
+    latitude, longitude = get_mks_position()
+    write_csv(latitude, longitude)
+    time.sleep(5)
+
